@@ -13,14 +13,14 @@ Paper Orator processes academic PDFs through a four-stage pipeline:
 
 Each stage saves intermediate files, so you can re-run later stages without repeating earlier ones.
 
-## PrerequisitesP
+## Prerequisites
 
 You need Azure resources for four services. Create them in the [Azure Portal](https://portal.azure.com):
 
 | Service | What it does | Azure resource |
 |---|---|---|
 | OCR | Extracts text/tables/figures from PDFs | [Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/) |
-| LLM | Cleans and prepares text for speech | [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-services/openai/) (deploy a model with vision, e.g. `gpt-4.1-mini`) |
+| LLM | Cleans and prepares text for speech | [Azure OpenAI](https://learn.microsoft.com/en-us/azure/foundry/openai/reference) (deploy a model with vision, e.g. `gpt-4.1-mini`) |
 | TTS | Converts text to spoken audio | [Speech Service](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/) |
 | Storage | Hosts the MP3 and RSS files | [Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/) |
 
