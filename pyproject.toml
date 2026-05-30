@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paper-orator"
+version = "0.1.0"
+description = "Turn PDF papers into narrated audio podcasts with an RSS feed"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Spencer Williams" },
+]
+keywords = ["pdf", "tts", "text-to-speech", "podcast", "rss", "research", "papers"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "openai>=1.50.0",
+    "azure-ai-documentintelligence>=1.0.0b4",
+    "azure-cognitiveservices-speech>=1.40.0",
+    "azure-storage-blob>=12.20.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4.0",
+]
+
+[project.scripts]
+paper-orator = "paper_orator.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sw23/paper-orator"
+Repository = "https://github.com/sw23/paper-orator"
+Issues = "https://github.com/sw23/paper-orator/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
