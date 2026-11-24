@@ -21,7 +21,7 @@ You need Azure resources for four services. Create them in the [Azure Portal](ht
 |---|---|---|
 | OCR | Extracts text/tables/figures from PDFs | [Document Intelligence](https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/) |
 | LLM | Cleans and prepares text for speech | [Azure OpenAI](https://learn.microsoft.com/en-us/azure/foundry/openai/reference) (deploy a model with vision, e.g. `gpt-4.1-mini`) |
-| TTS | Converts text to spoken audio | [Speech Service](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/) |
+| TTS | Converts text to spoken audio | [Speech Service](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/) (defaults to a [MAI voice](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/mai-voices)) |
 | Storage | Hosts the MP3 and RSS files | [Blob Storage](https://learn.microsoft.com/en-us/azure/storage/blobs/) |
 
 > **Note:** Storage is only needed if you use `--upload`. You can generate audio locally without it.
@@ -93,7 +93,7 @@ output/Attention-Is-All-You-Need/
 ├── Attention-Is-All-You-Need.mp3   # Final audio
 ├── figure_0.png ... figure_N.png   # Extracted figures
 ├── table_0.txt ... table_N.txt     # Extracted tables
-└── batch_results.zip               # TTS batch output archive
+└── batch_results.zip               # TTS batch output archive (only when use_batch is on)
 ```
 
 ### 4. Publish to RSS
@@ -157,8 +157,9 @@ feed:
 
 # Text-to-speech settings
 tts:
-  voice: "en-US-JennyNeural"   # Azure TTS voice name
-  use_batch: true              # true = batch API (long audio), false = SDK (~10 min limit)
+  voice: "en-US-Harper:MAI-Voice-2.1"  # Azure TTS voice name
+  use_batch: false                     # true = batch API (standard neural voices only)
+  # output_format: "audio-24khz-48kbitrate-mono-mp3"  # any Azure MP3 output format
 
 # Which backend to use for each pipeline stage
 providers:
@@ -185,6 +186,21 @@ azure:
 ```
 
 See [paper_orator.example.yaml](paper_orator.example.yaml) for a complete template.
+
+### Choosing a voice
+
+The default voice is `en-US-Harper:MAI-Voice-2.1`, one of Microsoft's [MAI voices](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/mai-voices). MAI voice names use the form `<voice>:<model>`:
+
+| Model | Example | Notes |
+|---|---|---|
+| MAI-Voice-2.1 | `en-US-Harper:MAI-Voice-2.1` | Highest quality |
+| MAI-Voice-2.1-Flash | `en-US-Harper:MAI-Voice-2.1-Flash` | Faster, lower latency |
+
+English (en-US) MAI voices: `Harper`, `Olivia`, `Iris`, `Ethan`, `Grant`, `Sage`, `Jasper`. HD voices (e.g. `en-US-Ava:DragonHDLatestNeural`) and standard neural voices (e.g. `en-US-JennyNeural`) also work.
+
+> **Note:** MAI voices are in public preview (no SLA). They're served from a [subset of Azure regions](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/mai-voices). If you get errors, check that your Speech resource's region is supported, or switch back to a standard voice such as `en-US-JennyNeural`.
+
+MAI and HD voices are real-time only, so Paper Orator splits the text into chunks of a few minutes each, synthesizes them one at a time, and joins the MP3 segments. There is no overall length limit. `use_batch: true` uses the batch synthesis API instead, but only standard neural voices support it. With any other voice the setting is ignored.
 
 ## Architecture
 

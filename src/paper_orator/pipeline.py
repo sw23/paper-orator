@@ -194,9 +194,11 @@ def _run_synthesis(cleaned_text, output_audio_path, config, force, interactive):
     if _should_run_stage(output_audio_path, "speech synthesis", force, interactive):
         logger.info("Synthesizing speech...")
         tts_config = get_provider_config(config, "tts")
+        tts_settings = config.get("tts", {})
         tts_kwargs = {
-            "voice": config.get("tts", {}).get("voice", "en-US-JennyNeural"),
-            "use_batch": config.get("tts", {}).get("use_batch", True),
+            key: tts_settings[key]
+            for key in ("voice", "use_batch", "output_format")
+            if tts_settings.get(key) is not None
         }
         synthesizer = get_provider("tts", config["providers"]["tts"], tts_config, **tts_kwargs)
         synthesizer.synthesize(cleaned_text, output_audio_path)

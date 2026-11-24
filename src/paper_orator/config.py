@@ -28,8 +28,8 @@ _DEFAULTS = {
         "language": "en-us",
     },
     "tts": {
-        "voice": "en-US-JennyNeural",
-        "use_batch": True,
+        "voice": "en-US-Harper:MAI-Voice-2.1",
+        "use_batch": False,
     },
     "providers": {
         "ocr": "azure",
@@ -175,8 +175,13 @@ feed:
 
 # Text-to-speech settings
 tts:
-  voice: "en-US-JennyNeural"
-  use_batch: true
+  # MAI voices use "<voice>:MAI-Voice-2.1" (or ":MAI-Voice-2.1-Flash"), e.g.
+  # en-US-Harper, en-US-Olivia, en-US-Iris, en-US-Ethan, en-US-Grant, en-US-Sage.
+  # Standard neural voices (e.g. "en-US-JennyNeural") also work.
+  voice: "en-US-Harper:MAI-Voice-2.1"
+  # Batch synthesis only supports standard neural voices; MAI/HD voices always
+  # use chunked real-time synthesis, which has no length limit.
+  use_batch: false
 
 # Provider selection (currently supported: "azure")
 providers:
