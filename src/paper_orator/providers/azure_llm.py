@@ -5,7 +5,7 @@
 
 import logging
 
-from openai import AzureOpenAI
+from openai import OpenAI
 
 from paper_orator.providers.base import PageContent, TextCleaner
 
@@ -32,6 +32,18 @@ SYSTEM_PROMPT = (
 IMAGE_LIMIT = 10
 
 
+def _v1_base_url(endpoint: str) -> str:
+    """Build the Azure OpenAI v1 GA API base URL from a resource endpoint.
+
+    Accepts either a bare resource endpoint (``https://<name>.openai.azure.com/``)
+    or one that already ends in ``/openai/v1``.
+    """
+    endpoint = endpoint.rstrip("/")
+    if endpoint.endswith("/openai/v1"):
+        return endpoint + "/"
+    return endpoint + "/openai/v1/"
+
+
 class AzureTextCleaner(TextCleaner):
     """Cleans extracted document text using Azure OpenAI with vision capabilities."""
 
@@ -41,10 +53,11 @@ class AzureTextCleaner(TextCleaner):
         Args:
             config: Dict with keys 'endpoint', 'key', and 'deployment'.
         """
-        self.client = AzureOpenAI(
-            azure_endpoint=config["endpoint"],
+        # Use the Azure OpenAI v1 GA API. Unlike the dated preview API versions
+        # (e.g. "2025-03-01-preview"), it has no api-version to pin or retire.
+        self.client = OpenAI(
+            base_url=_v1_base_url(config["endpoint"]),
             api_key=config["key"],
-            api_version="2025-03-01-preview",
         )
         self.deployment = config["deployment"]
 
@@ -96,5 +109,12 @@ class AzureTextCleaner(TextCleaner):
 
         if response.error:
             raise RuntimeError(f"OpenAI API error: {response.error.message}")
+
+        if response.status == "incomplete":
+            reason = getattr(response.incomplete_details, "reason", None) or "unknown"
+            raise RuntimeError(
+                f"LLM response was truncated (reason: {reason}). The cleaned text would be "
+                "missing part of the paper; try a deployment with a larger output limit."
+            )
 
         return response.output_text
