@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from paper_orator.providers.base import (
     DocumentExtractor,
-    StorageUploader,
     SpeechSynthesizer,
+    StorageUploader,
     TextCleaner,
 )
 

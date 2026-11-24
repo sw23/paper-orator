@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 
+from azure.core.exceptions import AzureError, ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient, ContentSettings
 
 from paper_orator.providers.base import StorageUploader
@@ -33,7 +34,7 @@ class AzureBlobUploader(StorageUploader):
 
             try:
                 container_client.get_container_properties()
-            except Exception:
+            except ResourceNotFoundError:
                 logger.error(f"Container does not exist: {self.container_name}")
                 return None
 
@@ -65,6 +66,6 @@ class AzureBlobUploader(StorageUploader):
 
             return blob_url
 
-        except Exception as e:
-            logger.error(f"Failed to upload to Azure Storage: {e}")
+        except (AzureError, OSError, ValueError) as e:
+            logger.error(f"Failed to upload {file_path} to Azure Storage: {e}")
             return None

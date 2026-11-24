@@ -12,7 +12,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Union
 
-
 # Type alias for the page content structure returned by document extractors.
 # Each page is a list of items which are either plain text strings or dicts
 # representing figures (with keys: type, index, data, path).

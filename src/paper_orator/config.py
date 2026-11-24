@@ -7,9 +7,9 @@ Loads a YAML config file and resolves ${ENV_VAR} references to environment
 variable values.
 """
 
+import logging
 import os
 import re
-import logging
 import shutil
 
 import yaml
@@ -47,7 +47,7 @@ def _resolve_env_vars(value):
             var_name = match.group(1)
             env_val = os.environ.get(var_name)
             if env_val is None:
-                raise EnvironmentError(
+                raise OSError(
                     f"Environment variable '{var_name}' is referenced in config but not set"
                 )
             return env_val
@@ -84,7 +84,7 @@ def load_config(config_path: str) -> dict:
 
     Raises:
         FileNotFoundError: If the config file does not exist.
-        EnvironmentError: If a referenced environment variable is not set.
+        OSError: If a referenced environment variable is not set.
     """
     if not os.path.exists(config_path):
         raise FileNotFoundError(
@@ -109,6 +109,10 @@ def get_provider_config(config: dict, provider_type: str) -> dict:
 
     Looks up which backend is selected for the given provider type
     (e.g. "azure" for "ocr") and returns the corresponding config section.
+    Within the backend section, the provider's sub-section is looked up by its
+    Azure-style name (e.g. "document_intelligence"), then by the provider type
+    (e.g. "ocr"). If neither exists, the whole backend section is returned, so
+    a custom provider can use a flat ``custom:`` section.
 
     Args:
         config: The full resolved config dict.
@@ -127,9 +131,11 @@ def get_provider_config(config: dict, provider_type: str) -> dict:
         "storage": "storage",
     }
 
-    backend_config = config.get(provider_name, {})
-    section_key = section_map.get(provider_type, provider_type)
-    return backend_config.get(section_key, {})
+    backend_config = config.get(provider_name) or {}
+    for section_key in (section_map.get(provider_type), provider_type):
+        if section_key in backend_config:
+            return backend_config[section_key] or {}
+    return backend_config
 
 
 def create_default_config(output_path: str) -> None:
