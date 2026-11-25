@@ -17,6 +17,12 @@ from urllib.parse import quote, urljoin
 
 logger = logging.getLogger(__name__)
 
+ATOM_NS = "http://www.w3.org/2005/Atom"
+
+# Keep the conventional "atom:" prefix when an existing feed is re-parsed and
+# rewritten (otherwise ElementTree emits an auto-generated "ns0:" prefix).
+ET.register_namespace("atom", ATOM_NS)
+
 
 def update_rss_feed(
     rss_file_path: str,
@@ -97,14 +103,13 @@ def update_rss_feed(
 
     if root is None:
         root = ET.Element("rss", version="2.0")
-        root.set("xmlns:atom", "http://www.w3.org/2005/Atom")
 
         channel = ET.SubElement(root, "channel")
         ET.SubElement(channel, "title").text = feed_title
         ET.SubElement(channel, "description").text = feed_description
         ET.SubElement(channel, "link").text = feed_link
 
-        atom_link = ET.SubElement(channel, "atom:link")
+        atom_link = ET.SubElement(channel, f"{{{ATOM_NS}}}link")
         atom_link.set("href", feed_link)
         atom_link.set("rel", "self")
         atom_link.set("type", "application/rss+xml")

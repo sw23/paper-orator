@@ -208,8 +208,10 @@ def _run_upload(output_audio_path, rss_file_path, paper_name, config):
     storage_config = get_provider_config(config, "storage")
     uploader = get_provider("storage", config["providers"]["storage"], storage_config)
 
-    mp3_blob_name = f"feed/{paper_name}.mp3"
-    uploader.upload(output_audio_path, mp3_blob_name)
-
+    uploads = [(output_audio_path, f"feed/{paper_name}.mp3")]
     if rss_file_path and os.path.exists(rss_file_path):
-        uploader.upload(rss_file_path, "feed/feed.xml")
+        uploads.append((rss_file_path, "feed/feed.xml"))
+
+    failed = [path for path, blob_name in uploads if uploader.upload(path, blob_name) is None]
+    if failed:
+        raise RuntimeError(f"Upload failed for: {', '.join(failed)}")

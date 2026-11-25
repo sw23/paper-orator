@@ -132,22 +132,26 @@ def _handle_process(args) -> None:
     # Load config
     try:
         config = load_config(args.config)
-    except (FileNotFoundError, EnvironmentError) as e:
+    except OSError as e:
         logger.error(str(e))
         sys.exit(1)
 
     # Run pipeline
-    run_pipeline(
-        pdf_path=args.pdf_path,
-        config=config,
-        paper_name=args.paper_name,
-        output_dir=args.output_dir,
-        update_rss=args.update_rss,
-        upload=args.upload,
-        web_url=args.web_url,
-        force=args.force,
-        interactive=args.interactive,
-    )
+    try:
+        run_pipeline(
+            pdf_path=args.pdf_path,
+            config=config,
+            paper_name=args.paper_name,
+            output_dir=args.output_dir,
+            update_rss=args.update_rss,
+            upload=args.upload,
+            web_url=args.web_url,
+            force=args.force,
+            interactive=args.interactive,
+        )
+    except RuntimeError as e:
+        logger.error(str(e))
+        sys.exit(1)
 
 
 if __name__ == "__main__":

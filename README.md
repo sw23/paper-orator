@@ -38,6 +38,8 @@ For development:
 
 ```bash
 pip install -e ".[dev]"
+ruff check src tests   # lint
+pytest                 # run the test suite (no Azure credentials needed)
 ```
 
 ## Quick Start
@@ -209,14 +211,14 @@ from my_module import MyCustomExtractor
 register_provider("ocr", "custom", MyCustomExtractor)
 ```
 
-3. Set `providers.ocr: custom` in your config file and add a corresponding `custom:` config section.
+3. Set `providers.ocr: custom` in your config file and add a corresponding `custom:` config section. The provider receives `custom.ocr` if present, otherwise the whole `custom:` section.
 
 ## Contributing
 
 Contributions are welcome! Some ideas:
 
 - Additional provider backends (AWS, GCP, local/open-source models)
-- Unit and integration tests
+- Integration tests against live services
 - Voice selection and SSML customization
 - Chapter markers / table of contents in audio
 
